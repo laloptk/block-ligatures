@@ -20,3 +20,16 @@ define( 'BLOCK_LIGATURES_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BLOCK_LIGATURES_URL', plugin_dir_url( __FILE__ ) );
 
 require_once BLOCK_LIGATURES_PATH . 'vendor/autoload.php';
+
+/*
+** This will load the manifest to register blocks
+** New blocks are added automatically to the manifest
+** When running npm build or npm start
+*/
+function block_ligatures_register_blocks() {
+    wp_register_block_types_from_metadata_collection(
+        __DIR__ . '/build',
+        __DIR__ . '/build/blocks-manifest.php'
+    );
+}
+add_action( 'init', 'block_ligatures_register_blocks' );
