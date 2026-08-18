@@ -1,0 +1,18 @@
+{
+	"name": "block-ligatures/block-ligatures",
+	"description": "Adds ligature support to block editor typography.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=7.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"BlockLigatures\\": "includes/"
+		}
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"sort-packages": true
+	}
+}
