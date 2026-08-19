@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "block-ligatures/sample-block",
+	"title": "Sample Block",
+	"category": "text",
+	"icon": "smiley",
+	"description": "Sample block used to verify the build pipeline and blocks manifest registration.",
+	"example": {},
+	"supports": {
+		"html": false
+	},
+	"textdomain": "block-ligatures",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css"
+}
