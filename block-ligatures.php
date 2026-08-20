@@ -4,7 +4,7 @@
  * Description:       Adds ligature support to block editor typography.
  * Version:           1.0.0
  * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires PHP:      8.0
  * Author:            Lalo
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -20,6 +20,9 @@ define( 'BLOCK_LIGATURES_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BLOCK_LIGATURES_URL', plugin_dir_url( __FILE__ ) );
 
 require_once BLOCK_LIGATURES_PATH . 'vendor/autoload.php';
+use BlockLigatures\DB\Source_Table;
+use BlockLigatures\DB\Relationships_Table;
+use BlockLigatures\DB\Table_Installer;
 
 /*
 ** This will load the manifest to register blocks
@@ -33,3 +36,19 @@ function block_ligatures_register_blocks() {
     );
 }
 add_action( 'init', 'block_ligatures_register_blocks' );
+
+
+/*
+** Installing the custom tables to store sources and relationships
+*/
+function bl_create_tables() {
+    $source_table = new Source_Table();
+    $relationships_table = new Relationships_Table();
+    $tables_obj = new Table_Installer($source_table, $relationships_table);
+    $tables_obj->install();
+}
+
+register_activation_hook (
+	__FILE__,
+	'bl_create_tables'
+);
