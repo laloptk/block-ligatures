@@ -52,3 +52,12 @@ register_activation_hook(
 	__FILE__,
 	'bl_create_tables'
 );
+
+use BlockLigatures\DB\Repos\Sources_Repo;
+use BlockLigatures\API\Sources_Search_Controller;
+
+add_action( 'plugins_loaded', function () {
+    $sources_repo = new Sources_Repo();
+
+    $search_controller = new Sources_Search_Controller( $sources_repo );
+} );
