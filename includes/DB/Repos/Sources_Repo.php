@@ -53,6 +53,32 @@ class Sources_Repo extends Abstract_Repo {
 		return $row;
 	}
 
+    public function find_by_ids( int ...$ids ) {
+        if ( empty( $ids ) ) {
+            throw new \InvalidArgumentException(
+                'find_by_ids: at least one id must be provided.'
+            );
+        }
+
+        foreach ( $ids as $id ) {
+            $this->throw_if_invalid_id( $id, __METHOD__ );
+        }
+
+        $placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+        $results = $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT * FROM %i WHERE source_id IN ({$placeholders})",
+                $this->table,
+                ...$ids
+            )
+        );
+
+        $this->throw_if_db_error( __METHOD__ );
+
+        return $results;
+    }
+
 	public function search_by_name( string $name, int $limit = 10 ): array {
 		if ( $limit <= 0 ) {
 			throw new \InvalidArgumentException(
