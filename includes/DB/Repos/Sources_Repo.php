@@ -1,220 +1,226 @@
-<?php 
+<?php
 
 namespace BlockLigatures\DB\Repos;
 
 class Sources_Repo extends Abstract_Repo {
 
-    protected function get_table_name():string {
-        return 'bl_reference_sources';
-    }
+	protected function get_table_name(): string {
+		return 'bl_reference_sources';
+	}
 
-    public function get_valid_statuses(): array {
-        return ['active', 'trashed', 'orphaned'];
-    }
+	public function get_valid_statuses(): array {
+		return array( 'active', 'trashed', 'orphaned' );
+	}
 
-    public function insert_source( array $data ):int|false {
-        $inserted = $this->wpdb->insert(
-            $this->table,
-            array(
-                'source_name' => $data['source_name'],
-                'source_block_id' => $data['source_block_id'],
-                'source_post_id' => $data['source_post_id'],
-                'source_content' => $data['source_content'],
-                'owning_slug' => $data['owning_slug'],
-            ),
-            array(
-                '%s',
-                '%s',
-                '%d',
-                '%s',
-                '%s'
-            )
-        );
+	public function insert_source( array $data ): int|false {
+		$inserted = $this->wpdb->insert(
+			$this->table,
+			array(
+				'source_name'     => $data['source_name'],
+				'source_block_id' => $data['source_block_id'],
+				'source_post_id'  => $data['source_post_id'],
+				'source_content'  => $data['source_content'],
+				'owning_slug'     => $data['owning_slug'],
+			),
+			array(
+				'%s',
+				'%s',
+				'%d',
+				'%s',
+				'%s',
+			)
+		);
 
-        $this->throw_if_db_error( __METHOD__ );
+		$this->throw_if_db_error( __METHOD__ );
 
-        return $this->wpdb->insert_id;
-    }
+		return $this->wpdb->insert_id;
+	}
 
-    public function find_by_id(int $source_id):array|false {
-        $this->throw_if_invalid_id( $source_id, __METHOD__ );
+	public function find_by_id( int $source_id ): array|false {
+		$this->throw_if_invalid_id( $source_id, __METHOD__ );
 
-        $row = $this->wpdb->get_row(
-            $this->wpdb->prepare(
-                "SELECT * FROM {$this->table} WHERE source_id=%d",
-                $source_id
-            )
-        );
+		$wpdb = $this->wpdb;
+		$row  = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT * FROM %i WHERE source_id=%d',
+				$this->table,
+				$source_id
+			)
+		);
 
-        $this->throw_if_db_error( __METHOD__ );
+		$this->throw_if_db_error( __METHOD__ );
 
-        return $row;
-    }
+		return $row;
+	}
 
-    public function search_by_name(string $name, int $limit = 10):array {
-        if( $limit <= 0 ) {
-            throw new \InvalidArgumentException(
-                "search_by_name: \$limit must be greater than 0, got {$limit}."
-            );
-        }
+	public function search_by_name( string $name, int $limit = 10 ): array {
+		if ( $limit <= 0 ) {
+			throw new \InvalidArgumentException(
+				"search_by_name: \$limit must be greater than 0, got {$limit}."
+			);
+		}
 
-        $results = $this->wpdb->get_results(
-            $this->wpdb->prepare(
-                "SELECT * FROM {$this->table} WHERE source_name LIKE %s LIMIT %d",
-                '%' . $this->wpdb->esc_like( $name ) . '%',
-                $limit
-            )
-        );
+		$wpdb    = $this->wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM %i WHERE source_name LIKE %s LIMIT %d',
+				$this->table,
+				'%' . $wpdb->esc_like( $name ) . '%',
+				$limit
+			)
+		);
 
-        $this->throw_if_db_error( __METHOD__ );
+		$this->throw_if_db_error( __METHOD__ );
 
-        return $results;
-    }
+		return $results;
+	}
 
-    public function find_all_by_source_post( int $post_id ): array {
-        $this->throw_if_invalid_id( $post_id, __METHOD__ );
+	public function find_all_by_source_post( int $post_id ): array {
+		$this->throw_if_invalid_id( $post_id, __METHOD__ );
 
-        $results = $this->wpdb->get_results(
-            $this->wpdb->prepare(
-                "SELECT * FROM {$this->table} WHERE source_post_id = %d",
-                $post_id
-            )
-        );
+		$wpdb    = $this->wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM %i WHERE source_post_id = %d',
+				$this->table,
+				$post_id
+			)
+		);
 
-        $this->throw_if_db_error( __METHOD__ );
+		$this->throw_if_db_error( __METHOD__ );
 
-        return $results;
-    }
+		return $results;
+	}
 
-    public function find_by_status( array $statuses, int $limit = 20, int $page = 1 ): array {
-        if ( empty( $statuses ) ) {
-            throw new \InvalidArgumentException(
-                'find_by_status: $statuses must not be empty.'
-            );
-        }
+	public function find_by_status( array $statuses, int $limit = 20, int $page = 1 ): array {
+		if ( empty( $statuses ) ) {
+			throw new \InvalidArgumentException(
+				'find_by_status: $statuses must not be empty.'
+			);
+		}
 
-        $valid_statuses = $this->get_valid_statuses();
+		$valid_statuses = $this->get_valid_statuses();
 
-        foreach ( $statuses as $status ) {
-            if ( ! in_array( $status, $valid_statuses, true ) ) {
-                throw new \InvalidArgumentException(
-                    'find_by_status: $statuses must only contain ' . implode( ', ', $valid_statuses ) . ", got {$status}."
-                );
-            }
-        }
+		foreach ( $statuses as $status ) {
+			if ( ! in_array( $status, $valid_statuses, true ) ) {
+				throw new \InvalidArgumentException(
+					'find_by_status: $statuses must only contain ' . implode( ', ', $valid_statuses ) . ", got {$status}."
+				);
+			}
+		}
 
-        if ( $limit <= 0 ) {
-            throw new \InvalidArgumentException(
-                "find_by_status: \$limit must be greater than 0, got {$limit}."
-            );
-        }
+		if ( $limit <= 0 ) {
+			throw new \InvalidArgumentException(
+				"find_by_status: \$limit must be greater than 0, got {$limit}."
+			);
+		}
 
-        if ( $page <= 0 ) {
-            throw new \InvalidArgumentException(
-                "find_by_status: \$page must be greater than 0, got {$page}."
-            );
-        }
+		if ( $page <= 0 ) {
+			throw new \InvalidArgumentException(
+				"find_by_status: \$page must be greater than 0, got {$page}."
+			);
+		}
 
-        $offset = ( $page - 1 ) * $limit;
-        $placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
+		$offset = ( $page - 1 ) * $limit;
+		$wpdb   = $this->wpdb;
 
-        $results = $this->wpdb->get_results(
-            $this->wpdb->prepare(
-                "SELECT * FROM {$this->table} WHERE status IN ({$placeholders}) LIMIT %d OFFSET %d",
-                array_merge( $statuses, [ $limit, $offset ] )
-            )
-        );
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM %i WHERE status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ') LIMIT %d OFFSET %d',
+				array_merge( array( $this->table ), $statuses, array( $limit, $offset ) )
+			)
+		);
 
-        $this->throw_if_db_error( __METHOD__ );
+		$this->throw_if_db_error( __METHOD__ );
 
-        return $results;
-    }
+		return $results;
+	}
 
-    public function mark_trashed(int $post_id) {
-        $this->throw_if_invalid_id( $post_id, __METHOD__ );
-        
-        $updated = $this->wpdb->update(
-            $this->table,
-            array('status' => 'trashed'),
-            array(
-                'source_post_id' => $post_id,
-                'status' => 'active'
-            ),
-            array('%s'),
-            array('%d', '%s')
-        );
+	public function mark_trashed( int $post_id ) {
+		$this->throw_if_invalid_id( $post_id, __METHOD__ );
 
-        $this->throw_if_db_error( __METHOD__ );
+		$updated = $this->wpdb->update(
+			$this->table,
+			array( 'status' => 'trashed' ),
+			array(
+				'source_post_id' => $post_id,
+				'status'         => 'active',
+			),
+			array( '%s' ),
+			array( '%d', '%s' )
+		);
 
-        return $updated;
-    }
+		$this->throw_if_db_error( __METHOD__ );
 
-    public function mark_active(int $post_id) {
-        $this->throw_if_invalid_id( $post_id, __METHOD__ );
-        
-        $updated = $this->wpdb->update(
-            $this->table,
-            array('status' => 'active'),
-            array(
-                'source_post_id' => $post_id,
-                'status' => 'trashed'
-            ),
-            array('%s'),
-            array('%d', '%s')
-        );
+		return $updated;
+	}
 
-        $this->throw_if_db_error( __METHOD__ );
+	public function mark_active( int $post_id ) {
+		$this->throw_if_invalid_id( $post_id, __METHOD__ );
 
-        return $updated;
-    }
+		$updated = $this->wpdb->update(
+			$this->table,
+			array( 'status' => 'active' ),
+			array(
+				'source_post_id' => $post_id,
+				'status'         => 'trashed',
+			),
+			array( '%s' ),
+			array( '%d', '%s' )
+		);
 
-    public function mark_orphaned( int ...$source_ids ): int {
-        if ( empty( $source_ids ) ) {
-            throw new \InvalidArgumentException(
-                'mark_orphaned: at least one id must be provided.'
-            );
-        }
+		$this->throw_if_db_error( __METHOD__ );
 
-        foreach ( $source_ids as $source_id ) {
-            $this->throw_if_invalid_id( $source_id, __METHOD__ );
-        }
+		return $updated;
+	}
 
-        $placeholders = implode( ', ', array_fill( 0, count( $source_ids ), '%d' ) );
+	public function mark_orphaned( int ...$source_ids ): int {
+		if ( empty( $source_ids ) ) {
+			throw new \InvalidArgumentException(
+				'mark_orphaned: at least one id must be provided.'
+			);
+		}
 
-        $updated = $this->wpdb->query(
-            $this->wpdb->prepare(
-                "UPDATE {$this->table} SET status = 'orphaned' WHERE source_id IN ({$placeholders})",
-                $source_ids
-            )
-        );
+		foreach ( $source_ids as $source_id ) {
+			$this->throw_if_invalid_id( $source_id, __METHOD__ );
+		}
 
-        $this->throw_if_db_error( __METHOD__ );
+		$wpdb = $this->wpdb;
 
-        return $updated;
-    }
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE %i SET status = 'orphaned' WHERE source_id IN (" . implode( ', ', array_fill( 0, count( $source_ids ), '%d' ) ) . ')',
+				array_merge( array( $this->table ), $source_ids )
+			)
+		);
 
-    public function delete_by_ids( int ...$ids ): int {
-        if ( empty( $ids ) ) {
-            throw new \InvalidArgumentException(
-                'delete_by_ids: at least one id must be provided.'
-            );
-        }
+		$this->throw_if_db_error( __METHOD__ );
 
-        foreach ( $ids as $id ) {
-            $this->throw_if_invalid_id( $id, __METHOD__ );
-        }
+		return $updated;
+	}
 
-        $placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+	public function delete_by_ids( int ...$ids ): int {
+		if ( empty( $ids ) ) {
+			throw new \InvalidArgumentException(
+				'delete_by_ids: at least one id must be provided.'
+			);
+		}
 
-        $deleted = $this->wpdb->query(
-            $this->wpdb->prepare(
-                "DELETE FROM {$this->table} WHERE source_id IN ({$placeholders})",
-                $ids
-            )
-        );
+		foreach ( $ids as $id ) {
+			$this->throw_if_invalid_id( $id, __METHOD__ );
+		}
 
-        $this->throw_if_db_error( __METHOD__ );
+		$wpdb = $this->wpdb;
 
-        return $deleted;
-    }
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				'DELETE FROM %i WHERE source_id IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')',
+				array_merge( array( $this->table ), $ids )
+			)
+		);
+
+		$this->throw_if_db_error( __METHOD__ );
+
+		return $deleted;
+	}
 }

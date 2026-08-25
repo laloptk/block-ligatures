@@ -30,10 +30,10 @@ use BlockLigatures\DB\Table_Installer;
 ** When running npm build or npm start
 */
 function block_ligatures_register_blocks() {
-    wp_register_block_types_from_metadata_collection(
-        __DIR__ . '/build',
-        __DIR__ . '/build/blocks-manifest.php'
-    );
+	wp_register_block_types_from_metadata_collection(
+		__DIR__ . '/build',
+		__DIR__ . '/build/blocks-manifest.php'
+	);
 }
 add_action( 'init', 'block_ligatures_register_blocks' );
 
@@ -42,13 +42,13 @@ add_action( 'init', 'block_ligatures_register_blocks' );
 ** Installing the custom tables to store sources and relationships
 */
 function bl_create_tables() {
-    $source_table = new Source_Table();
-    $relationships_table = new Relationships_Table();
-    $tables_obj = new Table_Installer($source_table, $relationships_table);
-    $tables_obj->install();
+	$source_table        = new Source_Table();
+	$relationships_table = new Relationships_Table();
+	$tables_obj          = new Table_Installer( $source_table, $relationships_table );
+	$tables_obj->install();
 }
 
-register_activation_hook (
+register_activation_hook(
 	__FILE__,
 	'bl_create_tables'
 );
