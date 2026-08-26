@@ -58,13 +58,22 @@ use BlockLigatures\API\Sources_Search_Controller;
 use BlockLigatures\API\Sources_Resolve_Controller;
 use BlockLigatures\API\Sources_List_Controller;
 use BlockLigatures\API\Sources_Delete_Controller;
+use BlockLigatures\DB\Repos\Relationships_Repo;
+use BlockLigatures\API\Relationships_List_Controller;
 
 
-add_action( 'plugins_loaded', function () {
-    $sources_repo = new Sources_Repo();
+add_action(
+	'plugins_loaded',
+	function () {
+		$sources_repo = new Sources_Repo();
 
-    $search_controller = new Sources_Search_Controller( $sources_repo );
-    $resolve_controller = new Sources_Resolve_Controller( $sources_repo );
-	$list_controller = new Sources_List_Controller($sources_repo);
-	$delete_controller = new Sources_Delete_Controller($sources_repo);
-} );
+		$search_controller  = new Sources_Search_Controller( $sources_repo );
+		$resolve_controller = new Sources_Resolve_Controller( $sources_repo );
+		$list_controller    = new Sources_List_Controller( $sources_repo );
+		$delete_controller  = new Sources_Delete_Controller( $sources_repo );
+
+		$relationships_repo = new Relationships_Repo();
+
+		$rel_list_controller = new Relationships_List_Controller( $relationships_repo );
+	}
+);
